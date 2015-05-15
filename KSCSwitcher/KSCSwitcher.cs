@@ -179,7 +179,7 @@ namespace regexKSP {
 		
 		public static CelestialBody getKSCBody() {
 			CelestialBody home = Planetarium.fetch.Home;
-			if(home == null) {
+			if(!home) {
 				home = FlightGlobals.Bodies.Find(body => body.isHomeWorld == true);
 				if(home == null) {
 					throw new UnityException("KSCSwitcher: Could not find the homeworld!");
@@ -190,13 +190,13 @@ namespace regexKSP {
 		}
 
 		public static PQSCity findKSC(CelestialBody home) {
-			Transform t = home.gameObject.transform.Find("KSC");
+			Transform t = home.pqsController.transform.Find("KSC");
 			PQSCity KSC = (PQSCity)t.GetComponent(typeof(PQSCity));
 			return KSC;
 		}
 
 		public static PQSMod_MapDecalTangent findKSCMapDecal(CelestialBody home) {
-			Transform t = home.gameObject.transform.Find("KSC");
+			Transform t = home.pqsController.transform.Find("KSC");
 			PQSMod_MapDecalTangent decal = (PQSMod_MapDecalTangent)t.GetComponent(typeof(PQSMod_MapDecalTangent));
 			return decal;
 		}

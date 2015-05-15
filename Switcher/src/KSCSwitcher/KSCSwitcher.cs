@@ -178,141 +178,155 @@ namespace regexKSP {
 		}
 		
 		public static CelestialBody getKSCBody() {
-			CelestialBody Kerbin = FlightGlobals.Bodies.Find(body => body.name == "Kerbin");
-            if(Kerbin == null) {
-                Kerbin = FlightGlobals.Bodies.Find(body => body.name == "Earth"); // temp fix
-            }
-			return Kerbin;
+			CelestialBody home = Planetarium.fetch.Home;
+			if(!home) {
+				home = FlightGlobals.Bodies.Find(body => body.isHomeWorld == true);
+				if(home == null) {
+					throw new UnityException("KSCSwitcher: Could not find the homeworld!");
+				}
+			}
+
+			return home;
 		}
-		
+
+		public static PQSCity findKSC(CelestialBody home) {
+			Transform t = home.pqsController.transform.Find("KSC");
+			PQSCity KSC = (PQSCity)t.GetComponent(typeof(PQSCity));
+			return KSC;
+		}
+
+		public static PQSMod_MapDecalTangent findKSCMapDecal(CelestialBody home) {
+			Transform t = home.pqsController.transform.Find("KSC");
+			PQSMod_MapDecalTangent decal = (PQSMod_MapDecalTangent)t.GetComponent(typeof(PQSMod_MapDecalTangent));
+			return decal;
+		}
+
 		public static bool setSite(ConfigNode KSC) {
 			bool hasChanged = false;
             double dtmp;
             float ftmp;
             bool btmp;
-			CelestialBody Kerbin = getKSCBody();
-			var mods = Kerbin.pqsController.transform.GetComponentsInChildren(typeof(PQSMod), true);
+
 			ConfigNode pqsCity = KSC.GetNode("PQSCity");
-			ConfigNode pqsDecal = KSC.GetNode("PQSMod_MapDecalTangent");
-			
 			if(pqsCity == null) { return false; }
+			ConfigNode pqsDecal = KSC.GetNode("PQSMod_MapDecalTangent");
+			CelestialBody home = getKSCBody();
 
-			foreach(var m in mods) {
-                if(m.GetType().ToString().Equals("PQSCity")) {
-                    PQSCity mod = m as PQSCity;
-                    if(pqsCity.HasValue("KEYname")) {
-                        if(!(mod.name.Equals(pqsCity.GetValue("KEYname")))) {
-                            continue;
-                        }
+            PQSCity ksc = findKSC(home);
+			if(ksc != null) {
+                if(pqsCity.HasValue("KEYname")) {
+                    if(!(ksc.name.Equals(pqsCity.GetValue("KEYname")))) {
+						Debug.Log("KSCSwitcher: Could not retrieve KSC to move, reporting failure and moving on.");
+						return false;
                     }
-                    if(pqsCity.HasValue("repositionRadial")) {
-                        mod.repositionRadial = KSPUtil.ParseVector3(pqsCity.GetValue("repositionRadial"));
+                }
+                if(pqsCity.HasValue("repositionRadial")) {
+                    ksc.repositionRadial = KSPUtil.ParseVector3(pqsCity.GetValue("repositionRadial"));
+                }
+                if(pqsCity.HasValue("latitude") && pqsCity.HasValue("longitude")) {
+                    double lat, lon;
+                    double.TryParse(pqsCity.GetValue("latitude"), out lat);
+                    double.TryParse(pqsCity.GetValue("longitude"), out lon);
+                
+                    ksc.repositionRadial = KSCSwitcher.LLAtoECEF(lat, lon, 0, home.Radius);
+                }
+                if(pqsCity.HasValue("reorientInitialUp")) {
+                    ksc.reorientInitialUp = KSPUtil.ParseVector3(pqsCity.GetValue("reorientInitialUp"));
+                }
+                if(pqsCity.HasValue("repositionToSphere")) {
+                    if(bool.TryParse(pqsCity.GetValue("repositionToSphere"), out btmp)) {
+                        ksc.repositionToSphere = btmp;
                     }
-                    if(pqsCity.HasValue("latitude") && pqsCity.HasValue("longitude")) {
-                        double lat, lon;
-                        double.TryParse(pqsCity.GetValue("latitude"), out lat);
-                        double.TryParse(pqsCity.GetValue("longitude"), out lon);
-                    
-                        mod.repositionRadial = KSCSwitcher.LLAtoECEF(lat, lon, 0, Kerbin.Radius);
+                }
+                if(pqsCity.HasValue("repositionToSphereSurface")) {
+                    if(bool.TryParse(pqsCity.GetValue("repositionToSphereSurface"), out btmp)) {
+                        ksc.repositionToSphereSurface = btmp;
                     }
-                    if(pqsCity.HasValue("reorientInitialUp")) {
-                        mod.reorientInitialUp = KSPUtil.ParseVector3(pqsCity.GetValue("reorientInitialUp"));
-                    }
-                    if(pqsCity.HasValue("repositionToSphere")) {
-                        if(bool.TryParse(pqsCity.GetValue("repositionToSphere"), out btmp)) {
-                            mod.repositionToSphere = btmp;
-                        }
-                    }
-                    if(pqsCity.HasValue("repositionToSphereSurface")) {
-                        if(bool.TryParse(pqsCity.GetValue("repositionToSphereSurface"), out btmp)) {
-                            mod.repositionToSphereSurface = btmp;
-                        }
-                    }
-                    if (pqsCity.HasValue("repositionToSphereSurfaceAddHeight"))
+                }
+                if (pqsCity.HasValue("repositionToSphereSurfaceAddHeight")) {
+                    if (bool.TryParse(pqsCity.GetValue("repositionToSphereSurfaceAddHeight"), out btmp))
                     {
-                        if (bool.TryParse(pqsCity.GetValue("repositionToSphereSurfaceAddHeight"), out btmp))
-                        {
-                            mod.repositionToSphereSurfaceAddHeight = btmp;
-                        }
+                        ksc.repositionToSphereSurfaceAddHeight = btmp;
                     }
-                    if(pqsCity.HasValue("reorientToSphere")) {
-                        if(bool.TryParse(pqsCity.GetValue("reorientToSphere"), out btmp)) {
-                            mod.reorientToSphere = btmp;
-                        }
-                    }
-                    if(pqsCity.HasValue("repositionRadiusOffset")) {
-                        if(double.TryParse(pqsCity.GetValue("repositionRadiusOffset"), out dtmp)) {
-                            mod.repositionRadiusOffset = dtmp;
-                        }
-                    }
-                    if(pqsCity.HasValue("lodvisibleRangeMult")) {
-                        if(double.TryParse(pqsCity.GetValue("lodvisibleRangeMult"), out dtmp)) {
-                            foreach(PQSCity.LODRange l in mod.lod) {
-                                l.visibleRange *= (float)dtmp;
-                            }
-                        }
-                    }
-                    if(pqsCity.HasValue("reorientFinalAngle")) {
-                        if(float.TryParse(pqsCity.GetValue("reorientFinalAngle"), out ftmp)) {
-                            mod.reorientFinalAngle = ftmp;
-                        }
-                    }
-                    print("KSCSwitcher changed PQSCity");
-                    
-                    hasChanged = true;
-                    mod.OnSetup();
-                    mod.OnPostSetup();
-                    SpaceCenter.Instance.transform.localPosition = mod.transform.localPosition;
-                    SpaceCenter.Instance.transform.localRotation = mod.transform.localRotation;
                 }
-
-                // KSC Flat area
-                if(pqsDecal != null && m.GetType().ToString().Equals("PQSMod_MapDecalTangent")) {
-                    // thanks to asmi for this!
-                    PQSMod_MapDecalTangent mod = m as PQSMod_MapDecalTangent;
-                    if(pqsDecal.HasValue("position")) {
-                        mod.position = KSPUtil.ParseVector3(pqsDecal.GetValue("position"));
+                if(pqsCity.HasValue("reorientToSphere")) {
+                    if(bool.TryParse(pqsCity.GetValue("reorientToSphere"), out btmp)) {
+                        ksc.reorientToSphere = btmp;
                     }
-                    if(pqsDecal.HasValue("radius")) {
-                        if(double.TryParse(pqsDecal.GetValue("radius"), out dtmp)) {
-                            mod.radius = dtmp;
-                        }
-                    }
-                    if(pqsDecal.HasValue("heightMapDeformity")) {
-                        if(double.TryParse(pqsDecal.GetValue("heightMapDeformity"), out dtmp)) {
-                            mod.heightMapDeformity = dtmp;
-                        }
-                    }
-                    if(pqsDecal.HasValue("absoluteOffset")) {
-                        if(double.TryParse(pqsDecal.GetValue("absoluteOffset"), out dtmp)) {
-                            mod.absoluteOffset = dtmp;
-                        }
-                    }
-                    if(pqsDecal.HasValue("absolute")) {
-                        if(bool.TryParse(pqsDecal.GetValue("absolute"), out btmp)) {
-                            mod.absolute = btmp;
-                        }
-                    }
-                    if(pqsDecal.HasValue("latitude") && pqsDecal.HasValue("longitude")) {
-                        double lat, lon;
-                        double.TryParse(pqsDecal.GetValue("latitude"), out lat);
-                        double.TryParse(pqsDecal.GetValue("longitude"), out lon);
-                        
-                        mod.position = KSCSwitcher.LLAtoECEF(lat, lon, 0, Kerbin.Radius);
-                    }
-                    print("KSCSwitcher changed MapDecal_Tangent");
-
-                    hasChanged = true;
-                    mod.OnSetup();
                 }
+                if(pqsCity.HasValue("repositionRadiusOffset")) {
+                    if(double.TryParse(pqsCity.GetValue("repositionRadiusOffset"), out dtmp)) {
+                        ksc.repositionRadiusOffset = dtmp;
+                    }
+                }
+                if(pqsCity.HasValue("lodvisibleRangeMult")) {
+                    if(double.TryParse(pqsCity.GetValue("lodvisibleRangeMult"), out dtmp)) {
+                        foreach(PQSCity.LODRange l in ksc.lod) {
+                            l.visibleRange *= (float)dtmp;
+                        }
+                    }
+                }
+                if(pqsCity.HasValue("reorientFinalAngle")) {
+                    if(float.TryParse(pqsCity.GetValue("reorientFinalAngle"), out ftmp)) {
+                        ksc.reorientFinalAngle = ftmp;
+                    }
+                }
+                print("KSCSwitcher changed PQSCity");
+                
+                hasChanged = true;
+                ksc.OnSetup();
+                ksc.OnPostSetup();
+                SpaceCenter.Instance.transform.localPosition = ksc.transform.localPosition;
+                SpaceCenter.Instance.transform.localRotation = ksc.transform.localRotation;
+            } else {
+				Debug.Log("KSCSwitcher: Could not retrieve KSC to move, reporting failure and moving on.");
+				return false;
 			}
+
+            PQSMod_MapDecalTangent decal = findKSCMapDecal(home);
+			if(decal != null && pqsDecal != null) {
+                // KSC Flat area
+                if(pqsDecal.HasValue("position")) {
+                    decal.position = KSPUtil.ParseVector3(pqsDecal.GetValue("position"));
+                }
+                if(pqsDecal.HasValue("radius")) {
+                    if(double.TryParse(pqsDecal.GetValue("radius"), out dtmp)) {
+                        decal.radius = dtmp;
+                    }
+                }
+                if(pqsDecal.HasValue("heightMapDeformity")) {
+                    if(double.TryParse(pqsDecal.GetValue("heightMapDeformity"), out dtmp)) {
+                        decal.heightMapDeformity = dtmp;
+                    }
+                }
+                if(pqsDecal.HasValue("absoluteOffset")) {
+                    if(double.TryParse(pqsDecal.GetValue("absoluteOffset"), out dtmp)) {
+                        decal.absoluteOffset = dtmp;
+                    }
+                }
+                if(pqsDecal.HasValue("absolute")) {
+                    if(bool.TryParse(pqsDecal.GetValue("absolute"), out btmp)) {
+                        decal.absolute = btmp;
+                    }
+                }
+                if(pqsDecal.HasValue("latitude") && pqsDecal.HasValue("longitude")) {
+                    double lat, lon;
+                    double.TryParse(pqsDecal.GetValue("latitude"), out lat);
+                    double.TryParse(pqsDecal.GetValue("longitude"), out lon);
+                    
+                    decal.position = KSCSwitcher.LLAtoECEF(lat, lon, 0, home.Radius);
+                }
+                print("KSCSwitcher changed MapDecal_Tangent");
+
+                hasChanged = true;
+                decal.OnSetup();
+            }
 
 			if(hasChanged) {
 				if(KSC.HasValue("name")) {
 					KSCLoader.instance.Sites.lastSite = LastKSC.fetch.lastSite = KSC.GetValue("name");
                     print("KSCSwitcher changed MapDecal_Tangent");
 				}
-				// Kerbin.pqsController.RebuildSphere();
 			}
 
 			return hasChanged;
@@ -326,8 +340,6 @@ namespace regexKSP {
 				activeSite = newSite.name;
 				ScreenMessages.PostScreenMessage("Launch site changed to " + newSite.displayName, 2.5f, ScreenMessageStyle.LOWER_CENTER);
 				showWindow = false;
-                // KSCReset.shouldCameraBeReset = true;
-                // print("KSCSwitcher Launch site updated.  Camera reset set to true");
             }
 		}
 		
@@ -410,206 +422,4 @@ namespace regexKSP {
             return new Vector3((float)x, (float)y, (float)z);
         }
     }
-	
-	// provides a simple method for different classes to load, manage, and read the launch sites.
-	public class KSCSiteManager {
-        public List<ConfigNode> Sites;
-		public string defaultSite = "";
-		public string lastSite = "";
-		
-		public KSCSiteManager() {
-            Sites = new List<ConfigNode>();
-			ConfigNode KSCSettings = null;
-
-			foreach(ConfigNode node in GameDatabase.Instance.GetConfigNodes("KSCSWITCHER")) {
-                KSCSettings = node;
-			}
-            if(KSCSettings == null) {
-                throw new UnityException("KSCSwitcher KSCSWITCHER config node not found!");
-			}
-
-            if(KSCSettings.HasValue("DefaultSite")) {
-				defaultSite = KSCSettings.GetValue("DefaultSite");
-			}
-            if (KSCSettings.HasNode("LaunchSites")) {
-                ConfigNode node = KSCSettings.GetNode("LaunchSites");
-                ConfigNode[] sites = node.GetNodes("Site");
-
-                foreach (ConfigNode site in sites) {
-                    if (site.HasValue("name")) {
-                        ConfigNode pqsCity = site.GetNode("PQSCity");
-                        if (pqsCity == null) { continue; }
-
-                        if (pqsCity.HasValue("latitude") && pqsCity.HasValue("longitude")) {
-                            Sites.Add(site);
-                        }
-                    }
-                }
-            } else {
-                Debug.Log("KSCSwitcher No LaunchSites node found!");
-			}
-			
-			Debug.Log("KSCSwitcher loaded " + Sites.Count + " launch sites.");
-		}
-		
-		public ConfigNode getSiteByName(string name) {
-            foreach(ConfigNode site in Sites) {
-                if(site.HasValue("name")) {
-                    if(site.GetValue("name").Equals(name)) {
-                        return site;
-                    }
-                }
-            }
-            return null;
-		}
-		
-		public SortedList<string, LaunchSite> getSitesGeographicalList() {
-			SortedList<string, LaunchSite> siteLocations = new SortedList<string, LaunchSite>();
-            double lat, lon, dtmp;
-
-			foreach(ConfigNode site in KSCLoader.instance.Sites.Sites) {
-				ConfigNode pqsCity = site.GetNode("PQSCity");
-				LaunchSite temp = new LaunchSite();
-				temp.name = site.GetValue("name");
-				temp.displayName = site.GetValue("displayName");
-				double.TryParse(pqsCity.GetValue("latitude"), out lat);
-                double.TryParse(pqsCity.GetValue("longitude"), out lon);
-				temp.geographicLocation = new Vector2d(lat, lon);
-                if(site.HasValue("description")) {
-					temp.description = site.GetValue("description");
-				}
-				if(site.HasValue("availableFromUT")) {
-            		if(double.TryParse(site.GetValue("availableFromUT"), out dtmp)) {
-						temp.availableFromUT = dtmp;
-					}
-				}
-				if(site.HasValue("availableUntilUT")) {
-            		if(double.TryParse(site.GetValue("availableUntilUT"), out dtmp)) {
-						temp.availableUntilUT = dtmp;
-					}
-				}
-				siteLocations.Add(temp.name, temp);
-			}
-			
-			return siteLocations;
-		}
-	}
-
-	// Taniwha graciously offered the use of this code/method for saving our settings per save game.
-	// I've changed where appropriate and reformatted because of 1TBS.
-	public class LastKSC : ScenarioModule {
-		public string lastSite = "";
-		private static LastKSC instance;
-		
-		public static LastKSC fetch {
-			get {
-				if(instance == null) {
-					Game g = HighLogic.CurrentGame;
-					instance = g.scenarios.Select(s => s.moduleRef).OfType<LastKSC>().SingleOrDefault();
-				}
-				return instance;
-			}
-		}
-		
-		public override void OnLoad(ConfigNode config) {
-			if(config.HasValue("LastLaunchSite")) {
-				lastSite = config.GetValue("LastLaunchSite");
-			}
-			if(lastSite.Length > 0) {
-				KSCLoader.instance.Sites.lastSite = lastSite;
-			}
-/*
-			if(HighLogic.LoadedScene == GameScenes.TRACKSTATION) {
-				KSCSwitcher.activeSite = lastSite;
-			}
-*/
-		}
-		
-		public override void OnSave(ConfigNode config) {
-			config.AddValue("LastLaunchSite", lastSite);
-		}
-
-		public static void CreateSettings(Game game) {
-			if(!game.scenarios.Any(p=>p.moduleName == typeof(LastKSC).Name)) {
-				ProtoScenarioModule proto = game.AddProtoScenarioModule(typeof (LastKSC), GameScenes.TRACKSTATION);
-				proto.Load(ScenarioRunner.fetch);
-			}
-		}
-	}
-
-	public class KSCLoader {
-		public static KSCLoader instance = null;
-		public KSCSiteManager Sites = new KSCSiteManager();
-
-		void onGameStateCreated(Game game) {
-			LastKSC.CreateSettings(game);
-			bool noSite = false;
-			if(HighLogic.LoadedScene == GameScenes.SPACECENTER) {
-				foreach(ProtoScenarioModule m in HighLogic.CurrentGame.scenarios) {
-					if(m.moduleName == "LastKSC") {
-						LastKSC l = (LastKSC) m.Load(ScenarioRunner.fetch);
-						if(l.lastSite.Length > 0) {
-							// found a site, load it
-							ConfigNode site = Sites.getSiteByName(l.lastSite);
-				            if(site == null) {
-								l.lastSite = Sites.defaultSite;
-								noSite = true;
-							} else {
-								KSCSwitcher.setSite(site);
-								Debug.Log("KSCSwitcher set the launch site to " + l.lastSite);
-								return;
-							}
-						} else {
-							l.lastSite = Sites.defaultSite;
-							noSite = true;
-						}
-						if(noSite) {
-							if(Sites.defaultSite.Length > 0) {
-								ConfigNode site = Sites.getSiteByName(Sites.defaultSite);
-					            if(site == null) {
-									Debug.LogError("KSCSwitcher found a default site name but could not retrieve the site config: " + Sites.defaultSite);
-									return;
-								} else {
-									KSCSwitcher.setSite(site);
-									Debug.Log("KSCSwitcher set the initial launch site to " + Sites.defaultSite);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-
-		public KSCLoader() {
-			GameEvents.onGameStateCreated.Add(onGameStateCreated);
-		}
-	}
-
-	[KSPAddon(KSPAddon.Startup.MainMenu, false)]
-	public class ScenarioSpawn : MonoBehaviour {
-		void Start() {
-            if((object)(KSCLoader.instance) == null) {
-                KSCLoader.instance = new KSCLoader();
-			}
-            enabled = false;
-		}
-	}
-	
-	public class LaunchSite {
-        public string name { get; set; }
-        public string displayName { get; set; }
-		public string description { get; set; }
-		public Vector2d geographicLocation { get; set; }
-		public double availableFromUT { get; set; }
-		public double availableUntilUT { get; set; }
-		
-		public LaunchSite() {
-			this.name = "";
-            this.displayName = "";
-			this.description = "";
-			this.availableFromUT = 0.0;
-			this.availableUntilUT = 0.0;
-			this.geographicLocation = Vector2d.zero;
-		}
-	}
 }
