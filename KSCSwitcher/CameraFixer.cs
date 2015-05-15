@@ -32,7 +32,21 @@ namespace regexKSP {
     [KSPAddon(KSPAddon.Startup.EveryScene, false)]
     public class CameraFixer : MonoBehaviour {
         public static bool ready = false;
+        public static bool hasK = false;
+        public static bool foundK = false;
+
+        public static bool FoundKopernicus() {
+            foreach(AssemblyLoader.LoadedAssembly a in AssemblyLoader.loadedAssemblies)
+                if(a.assembly.GetName().Name.ToLowerInvariant().Contains("kopernicus"))
+                    return true;
+            return false;
+        }
         public void Start() {
+            if (!foundK) {
+                hasK = FoundKopernicus();
+                foundK = true;
+            }
+            if (hasK) { return; }
             if(HighLogic.LoadedScene.Equals(GameScenes.MAINMENU)) { ready = true; }
             if(!ready) { return; }
             if(HighLogic.LoadedScene == GameScenes.SPACECENTER) {
