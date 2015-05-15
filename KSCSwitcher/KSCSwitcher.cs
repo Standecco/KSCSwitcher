@@ -178,8 +178,9 @@ namespace regexKSP {
 		}
 		
 		public static CelestialBody getKSCBody() {
-			CelestialBody home = Planetarium.fetch.Home;
-			if(!home) {
+            CelestialBody home = null;
+            if(Planetarium.fetch != null) home = Planetarium.fetch.Home;
+			if(home == null) {
 				home = FlightGlobals.Bodies.Find(body => body.isHomeWorld == true);
 				if(home == null) {
 					throw new UnityException("KSCSwitcher: Could not find the homeworld!");
@@ -190,15 +191,57 @@ namespace regexKSP {
 		}
 
 		public static PQSCity findKSC(CelestialBody home) {
-			Transform t = home.pqsController.transform.Find("KSC");
-			PQSCity KSC = (PQSCity)t.GetComponent(typeof(PQSCity));
-			return KSC;
+            if(home != null) {
+                if(home.gameObject != null && home.gameObject.transform != null) {
+                    Transform t = home.pqsController.transform.Find("KSC");
+                    if(t != null) {
+                        PQSCity KSC = (PQSCity)t.GetComponent(typeof(PQSCity));
+                        return KSC;
+                    }
+                }
+
+                if(home.pqsController != null && home.pqsController.transform != null) {
+		            Transform t = home.pqsController.transform.Find("KSC");
+		            PQSCity KSC = (PQSCity)t.GetComponent(typeof(PQSCity));
+		            return KSC;
+                }
+            }
+
+            PQSCity[] cities = Resources.FindObjectsOfTypeAll<PQSCity>();
+            foreach(PQSCity c in cities) {
+                if(c.name == "KSC") {
+                    return c;
+				}
+			}
+
+            return null;
 		}
 
 		public static PQSMod_MapDecalTangent findKSCMapDecal(CelestialBody home) {
-			Transform t = home.pqsController.transform.Find("KSC");
-			PQSMod_MapDecalTangent decal = (PQSMod_MapDecalTangent)t.GetComponent(typeof(PQSMod_MapDecalTangent));
-			return decal;
+            if(home != null) {
+                if(home.gameObject != null && home.gameObject.transform != null) {
+                    Transform t = home.gameObject.transform.Find("KSC");
+                    if(t != null) {
+                        PQSMod_MapDecalTangent decal = (PQSMod_MapDecalTangent)t.GetComponent(typeof(PQSMod_MapDecalTangent));
+                        return decal;
+                    }
+                }
+
+                if(home.pqsController != null && home.pqsController.transform != null) {
+                    Transform t = home.pqsController.transform.Find("KSC");
+                    PQSMod_MapDecalTangent decal = (PQSMod_MapDecalTangent)t.GetComponent(typeof(PQSMod_MapDecalTangent));
+                    return decal;
+                }
+            }
+
+            PQSMod_MapDecalTangent[] decals = Resources.FindObjectsOfTypeAll<PQSMod_MapDecalTangent>();
+            foreach(PQSMod_MapDecalTangent d in decals) {
+                if(d.name == "KSC") {
+                    return d;
+				}
+			}
+
+            return null;
 		}
 
 		public static bool setSite(ConfigNode KSC) {
