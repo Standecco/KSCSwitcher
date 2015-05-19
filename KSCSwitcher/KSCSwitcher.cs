@@ -179,7 +179,9 @@ namespace regexKSP {
 		
 		public static CelestialBody getKSCBody() {
             CelestialBody home = null;
-            if(Planetarium.fetch != null) home = Planetarium.fetch.Home;
+            if(Planetarium.fetch != null) {
+				home = Planetarium.fetch.Home;
+			}
 			if(home == null) {
 				home = FlightGlobals.Bodies.Find(body => body.isHomeWorld == true);
 				if(home == null) {
