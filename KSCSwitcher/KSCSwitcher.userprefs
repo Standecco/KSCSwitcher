@@ -1,12 +1,12 @@
 ﻿<Properties>
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
-  <MonoDevelop.Ide.Workbench ActiveDocument="LaunchSite.cs">
+  <MonoDevelop.Ide.Workbench ActiveDocument="KSCSwitcher.cs">
     <Files>
-      <File FileName="KSCSwitcher.cs" Line="238" Column="58" />
-      <File FileName="CameraFixer.cs" Line="92" Column="1" />
+      <File FileName="KSCSwitcher.cs" Line="419" Column="18" />
+      <File FileName="CameraFixer.cs" Line="1" Column="1" />
       <File FileName="KSCLoader.cs" Line="1" Column="1" />
       <File FileName="LastKSC.cs" Line="1" Column="1" />
-      <File FileName="LaunchSite.cs" Line="16" Column="58" />
+      <File FileName="LaunchSite.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

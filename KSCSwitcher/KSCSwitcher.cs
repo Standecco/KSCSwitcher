@@ -53,11 +53,15 @@ namespace regexKSP {
 		private GUIStyle bStyle = null;
 		private GUIStyle siteText = null;
 		private GUIStyle infoLabel = null;
+		private CelestialBody KSCBody = null;
 
 		public void Start() {
             showWindow = false;
 			scrollPosition = Vector2.zero;
 			siteLocations = KSCLoader.instance.Sites.getSitesGeographicalList();
+			if(KSCBody == null) {
+				KSCBody = getKSCBody();
+			}
 			if(KSCLoader.instance.Sites.lastSite.Length > 0) {
 				activeSite = KSCLoader.instance.Sites.lastSite;
 	            print("KSCSwitcher set the active site to the last site of " + activeSite);
@@ -76,6 +80,7 @@ namespace regexKSP {
 		public void OnDestroy() {
 			RenderingManager.RemoveFromPostDrawQueue(2, this.onDraw);
 			RenderingManager.RemoveFromPostDrawQueue(3, this.onDrawGUI);
+            print("KSCSwitcher destroyed");
 		}
 		
 		public void onDrawGUI() {
@@ -147,7 +152,7 @@ namespace regexKSP {
 		public void onDraw() {
 			if(siteLocations.Count < 1 || lsTexture == null || !showSites || !iconDisplayDistance()) { return; }
 
-			CelestialBody Kerbin = getKSCBody();
+			CelestialBody Kerbin = KSCBody;
 			bool isActiveSite = false;
 			foreach(KeyValuePair<string, LaunchSite> kvp in siteLocations) {
 				Camera camera = MapView.MapCamera.camera;
@@ -379,7 +384,7 @@ namespace regexKSP {
 		private void focusOnSite(Vector2d loc) {
 			Debug.Log("Focusing on site");
 			PlanetariumCamera camera = PlanetariumCamera.fetch;
-			CelestialBody Kerbin = getKSCBody();
+			CelestialBody Kerbin = KSCBody;
 			Vector3d point = ScaledSpace.LocalToScaledSpace(Kerbin.GetWorldSurfacePosition(loc.x, loc.y, 0));
 			Vector3 vec = ScaledSpace.LocalToScaledSpace(Kerbin.transform.localPosition);
 			point = (point - vec).normalized * Kerbin.Radius;
@@ -439,8 +444,9 @@ namespace regexKSP {
 		}
 		
 		private bool iconDisplayDistance() {
-			CelestialBody Kerbin = getKSCBody();
-			return MapView.MapCamera.Distance < 25000 && MapView.MapCamera.target.name == Kerbin.name;
+			if(MapView.MapCamera.target.celestialBody == null) { return false; }
+			CelestialBody home = KSCBody;
+			return MapView.MapCamera.Distance < (home.Radius / 1000) && MapView.MapCamera.target.celestialBody.name == home.name;
 		}
 
         private static Vector3 LLAtoECEF(double lat, double lon, double alt, double radius) {
