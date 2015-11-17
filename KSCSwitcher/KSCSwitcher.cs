@@ -317,7 +317,7 @@ namespace regexKSP {
                 SpaceCenter.Instance.transform.localPosition = ksc.transform.localPosition;
                 SpaceCenter.Instance.transform.localRotation = ksc.transform.localRotation;
             } else {
-				Debug.Log("KSCSwitcher: Could not retrieve KSC to move, reporting failure and moving on.");
+				Debug.LogError("KSCSwitcher: Could not retrieve KSC to move, reporting failure and moving on.");
 				return false;
 			}
 
@@ -361,6 +361,7 @@ namespace regexKSP {
             }
 
 			if(hasChanged) {
+				SpaceCenter.Instance.Start();  // 1.0.5
 				if(KSC.HasValue("name")) {
 					KSCLoader.instance.Sites.lastSite = LastKSC.fetch.lastSite = KSC.GetValue("name");
                     print("KSCSwitcher changed MapDecal_Tangent");
