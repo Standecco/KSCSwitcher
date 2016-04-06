@@ -72,20 +72,19 @@ namespace regexKSP {
 	            print("KSCSwitcher could not set the active site");
 			}
 			loadTextures();
-			RenderingManager.AddToPostDrawQueue(2, this.onDraw);
-			RenderingManager.AddToPostDrawQueue(3, this.onDrawGUI);
             print("KSCSwitcher initialized");
 		}
 		
 		public void OnDestroy() {
-			RenderingManager.RemoveFromPostDrawQueue(2, this.onDraw);
-			RenderingManager.RemoveFromPostDrawQueue(3, this.onDrawGUI);
             print("KSCSwitcher destroyed");
 		}
 		
-		public void onDrawGUI() {
+		public void OnGUI() {
 			if(siteLocations.Count < 1) { return; }
 			
+		    if(Event.current.type == EventType.Repaint || Event.current.isMouse) {
+		        onDraw();
+		    }
 			GUI.skin = HighLogic.Skin;
 			if(bStyle == null) {
 				bStyle = new GUIStyle(GUI.skin.button);
@@ -155,7 +154,7 @@ namespace regexKSP {
 			CelestialBody Kerbin = KSCBody;
 			bool isActiveSite = false;
 			foreach(KeyValuePair<string, LaunchSite> kvp in siteLocations) {
-				Camera camera = MapView.MapCamera.camera;
+				Camera camera = PlanetariumCamera.Camera;
 				Vector3d point = Kerbin.GetWorldSurfacePosition(kvp.Value.geographicLocation.x, kvp.Value.geographicLocation.y, 0);
 				if(!IsOccluded(point, Kerbin)) {
 					isActiveSite = kvp.Value.name.Equals(activeSite);
