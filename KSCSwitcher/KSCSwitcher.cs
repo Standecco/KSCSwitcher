@@ -7,7 +7,7 @@ using KSP;
 using KSP.IO;
 
 /******************************************************************************
- * Copyright (c) 2014~2015, Justin Bengtson
+ * Copyright (c) 2014~2016, Justin Bengtson
  * All rights reserved.
  * 
  * Redistribution and use in source and binary forms, with or without

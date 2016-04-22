@@ -2,11 +2,11 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="KSCSwitcher/CameraFixer.cs">
     <Files>
-      <File FileName="KSCSwitcher/CameraFixer.cs" Line="38" Column="13" />
-      <File FileName="KSCSwitcher/KSCLoader.cs" Line="1" Column="1" />
-      <File FileName="KSCSwitcher/KSCSwitcher.cs" Line="1" Column="1" />
-      <File FileName="KSCSwitcher/LastKSC.cs" Line="1" Column="1" />
-      <File FileName="KSCSwitcher/LaunchSite.cs" Line="16" Column="58" />
+      <File FileName="KSCSwitcher/CameraFixer.cs" Line="5" Column="27" />
+      <File FileName="KSCSwitcher/KSCLoader.cs" Line="7" Column="27" />
+      <File FileName="KSCSwitcher/KSCSwitcher.cs" Line="10" Column="27" />
+      <File FileName="KSCSwitcher/LastKSC.cs" Line="7" Column="27" />
+      <File FileName="KSCSwitcher/LaunchSite.cs" Line="5" Column="27" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>
