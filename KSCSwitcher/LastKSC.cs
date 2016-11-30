@@ -68,7 +68,7 @@ namespace regexKSP {
 		public static void CreateSettings(Game game) {
 			if(!game.scenarios.Any(p=>p.moduleName == typeof(LastKSC).Name)) {
 				ProtoScenarioModule proto = game.AddProtoScenarioModule(typeof (LastKSC), GameScenes.TRACKSTATION);
-				proto.Load(ScenarioRunner.fetch);
+				proto.Load(ScenarioRunner.Instance);
 			}
 		}
 	}
@@ -83,7 +83,7 @@ namespace regexKSP {
 			if(HighLogic.LoadedScene == GameScenes.SPACECENTER) {
 				foreach(ProtoScenarioModule m in HighLogic.CurrentGame.scenarios) {
 					if(m.moduleName == "LastKSC") {
-						LastKSC l = (LastKSC) m.Load(ScenarioRunner.fetch);
+						LastKSC l = (LastKSC) m.Load(ScenarioRunner.Instance);
 						if(l.lastSite.Length > 0) {
 							// found a site, load it
 							ConfigNode site = Sites.getSiteByName(l.lastSite);
