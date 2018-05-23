@@ -9,6 +9,7 @@ UnityEngine.UI.dll
 # User-specific files
 *.suo
 *.user
+*.userprefs
 *.userosscache
 *.sln.docstates
 
@@ -234,3 +235,4 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+*.zip
