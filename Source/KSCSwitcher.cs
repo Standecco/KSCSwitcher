@@ -169,7 +169,7 @@ namespace regexKSP {
 
 					if(iconBound.Contains(Event.current.mousePosition)) {
                         GUI.Label(new Rect((float)(point.x) + 28f, (float)(Screen.height - point.y) + 5f, 50, 20), kvp.Value.displayName, siteText);
-						if(Event.current.type == EventType.mouseDown && Event.current.button == 0) {
+						if(Event.current.type == EventType.MouseDown && Event.current.button == 0) {
 							if(isActiveSite) {
 								ScreenMessages.PostScreenMessage("Cannot set launch site to active site.", 2.5f, ScreenMessageStyle.LOWER_CENTER);
 							} else {
