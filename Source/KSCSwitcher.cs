@@ -290,7 +290,8 @@ namespace regexKSP
         public static bool SetStartingSite(ConfigNode KSC)
         {
             bool b = SetSite(KSC);
-            FloatingOrigin.SetOffset(FindKSC(KSCBody).transform.position);
+            FloatingOrigin.fetch.ResetOffset();
+            //FloatingOrigin.SetOffset(FindKSC(KSCBody).transform.position);
             return b;
         }
 
