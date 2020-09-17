@@ -70,6 +70,7 @@ namespace regexKSP
                 return home;
             }
         }
+        private static bool isFirstStart = true;
 
         public void Start()
         {
@@ -290,8 +291,13 @@ namespace regexKSP
         public static bool SetStartingSite(ConfigNode KSC)
         {
             bool b = SetSite(KSC);
-            FloatingOrigin.fetch.ResetOffset();
-            //FloatingOrigin.SetOffset(FindKSC(KSCBody).transform.position);
+
+            if(isFirstStart && b)
+            {
+                FloatingOrigin.SetOffset(PSystemSetup.Instance.SCTransform.position);
+                isFirstStart = false;
+            }
+
             return b;
         }
 
