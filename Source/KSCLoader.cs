@@ -45,7 +45,7 @@ namespace regexKSP
                     else
                     {
                         KSCSwitcher.SetStartingSite(site);
-                        Debug.Log("KSCSwitcher set the launch site to " + l.lastSite);
+                        Debug.Log("KSCSwitcher set the launch site to the last site, " + l.lastSite);
                         return;
                     }
                 }
@@ -67,7 +67,7 @@ namespace regexKSP
                         else
                         {
                             KSCSwitcher.SetStartingSite(site);
-                            Debug.Log("KSCSwitcher set the initial launch site to " + Sites.defaultSite);
+                            Debug.Log("KSCSwitcher set the initial launch site to the default" + Sites.defaultSite);
                         }
                     }
                 }
