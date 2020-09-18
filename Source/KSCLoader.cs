@@ -44,7 +44,7 @@ namespace regexKSP
                     }
                     else
                     {
-                        KSCSwitcher.SetStartingSite(site);
+                        KSCSwitcher.SetSiteAndResetCamera(site);
                         Debug.Log("KSCSwitcher set the launch site to the last site, " + l.lastSite);
                         return;
                     }
@@ -66,7 +66,7 @@ namespace regexKSP
                         }
                         else
                         {
-                            KSCSwitcher.SetStartingSite(site);
+                            KSCSwitcher.SetSiteAndResetCamera(site);
                             Debug.Log("KSCSwitcher set the initial launch site to the default" + Sites.defaultSite);
                         }
                     }

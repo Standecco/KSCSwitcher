@@ -70,7 +70,7 @@ namespace regexKSP
                 return home;
             }
         }
-        private static bool isFirstStart = true;
+        public static string LastFloatingOriginKSC { get; set; }
 
         public void Start()
         {
@@ -269,14 +269,15 @@ namespace regexKSP
             return decals.FirstOrDefault(d => d.name == "KSC");
         }
 
-        public static bool SetStartingSite(ConfigNode KSC)
+        public static bool SetSiteAndResetCamera(ConfigNode KSC, bool force = false)
         {
             bool b = SetSite(KSC);
 
-            if(isFirstStart && b)
+            if (b && (force || (KSC.HasValue("name") && KSC.GetValue("name") != LastFloatingOriginKSC)))
             {
                 FloatingOrigin.SetOffset(PSystemSetup.Instance.SCTransform.position);
-                isFirstStart = false;
+                LastFloatingOriginKSC = KSC.GetValue("name");
+                Debug.Log("KSCSwitcher set floating point origin offset");
             }
 
             return b;
