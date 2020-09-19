@@ -87,8 +87,6 @@ namespace regexKSP
 
             lastUpdate = time;
 
-            // data from http://www-das.uwyo.edu/~geerts/cwx/notes/chap16/geo_clim.html#:~:text=Data%20from%20a%20large%20number,the%20south%20(Fig%202).
-            // and https://en.wikipedia.org/wiki/Position_of_the_Sun#Declination_of_the_Sun_as_seen_from_Earth
             float lat = (float)ksc.lat;
             float alt = (float)ksc.alt;
 
@@ -103,6 +101,9 @@ namespace regexKSP
         // FIXME
         private Color CalculateGrassColor(float lat, float alt, double time)
         {
+            // data from http://www-das.uwyo.edu/~geerts/cwx/notes/chap16/geo_clim.html#:~:text=Data%20from%20a%20large%20number,the%20south%20(Fig%202).
+            // and https://en.wikipedia.org/wiki/Position_of_the_Sun#Declination_of_the_Sun_as_seen_from_Earth
+
             bool southEmisphere = lat < 0;
 
             float avgTemperature = (-20 < lat && lat < 16) ? 27f : (southEmisphere ? 27 + 0.63f * (lat + 20) : 27 - 0.85f * (lat - 16));
@@ -162,7 +163,7 @@ namespace regexKSP
             }
         }
 
-        public static bool TryGetKSCGrassColor(CelestialBody home, PQSCity ksc, ConfigNode pqsCity, out Color col)
+        public static bool TryGetKSCGrassColor(CelestialBody home, ConfigNode pqsCity, out Color col)
         {
             col = new Color();
             if (pqsCity.HasValue("changeGrassColor"))
@@ -177,9 +178,10 @@ namespace regexKSP
                             return true;
                         }
                     }
-                    else if (TryParseGroundColor(home, ksc.lat, ksc.lon, out col, 2f))
+                    else if (double.TryParse(pqsCity.GetValue("latitude"), out double lat) && double.TryParse(pqsCity.GetValue("longitude"), out double lon))
                     {
-                        return true;
+                        if(TryParseGroundColor(home, lat, lon, out col, 2f))
+                            return true;
                     }
                 }
             }
